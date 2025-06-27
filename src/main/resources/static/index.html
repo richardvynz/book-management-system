@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --background-color: #f8fafc;
+            --surface-color: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: "📚";
+            font-size: 1.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-error {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--background-color);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--background-color);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .table tbody tr:hover {
+            background: var(--background-color);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Search and Filters */
+        .search-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .search-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            border-radius: 0.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-filters {
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                font-size: 0.875rem;
+            }
+
+            .nav-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Book status badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .badge-warning {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .badge-danger {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">Book Management System</div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showAddBookModal()">
+                    ➕ Add Book
+                </button>
+                <button class="btn btn-outline" onclick="refreshData()">
+                    🔄 Refresh
+                </button>
+                <button class="btn btn-secondary" onclick="testConnection()" title="Test API Connection">
+                    🔌 Test API
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="container">
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+        <button class="nav-tab" onclick="showTab('books')">📚 Books</button>
+        <button class="nav-tab" onclick="showTab('search')">🔍 Search</button>
+        <button class="nav-tab" onclick="showTab('analytics')">📈 Analytics</button>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div id="dashboard-tab" class="tab-content">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-books">-</div>
+                <div class="stat-label">Total Books</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="low-stock-count">-</div>
+                <div class="stat-label">Low Stock</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-value">-</div>
+                <div class="stat-label">Total Value</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="unique-authors">-</div>
+                <div class="stat-label">Authors</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Recent Books</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody id="recent-books">
+                        <tr>
+                            <td colspan="5" class="loading">
+                                <div class="spinner"></div>
+                                Loading books...
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Books Tab -->
+    <div id="books-tab" class="tab-content hidden">
+        <div class="search-filters">
+            <div class="search-group">
+                <label class="form-label">Sort By</label>
+                <select class="form-select" id="sort-field" onchange="loadBooks()">
+                    <option value="title">Title</option>
+                    <option value="author">Author</option>
+                    <option value="price">Price</option>
+                    <option value="publishedYear">Year</option>
+                    <option value="stockQuantity">Stock</option>
+                </select>
+            </div>
+            <div class="search-group">
+                <label class="form-label">Order</label>
+                <select class="form-select" id="sort-direction" onchange="loadBooks()">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+            <div class="search-group">
+                <label class="form-label">Per Page</label>
+                <select class="form-select" id="page-size" onchange="loadBooks()">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">All Books</h2>
+                <div class="pagination-info" id="books-pagination-info"></div>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>ISBN</th>
+                            <th>Year</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="books-table">
+                        <tr>
+                            <td colspan="7" class="loading">
+                                <div class="spinner"></div>
+                                Loading books...
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="books-pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Tab -->
+    <div id="search-tab" class="tab-content hidden">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Search Books</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Search Type</label>
+                        <select class="form-select" id="search-type" onchange="toggleSearchFields()">
+                            <option value="keyword">Keyword Search</option>
+                            <option value="author">Search by Author</option>
+                            <option value="title">Search by Title</option>
+                            <option value="year">Filter by Year</option>
+                            <option value="price">Filter by Price Range</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="keyword-search">
+                        <label class="form-label">Keyword</label>
+                        <input type="text" class="form-input" id="search-keyword" placeholder="Search in title, author, or description">
+                    </div>
+                    <div class="form-group hidden" id="author-search">
+                        <label class="form-label">Author Name</label>
+                        <input type="text" class="form-input" id="search-author" placeholder="Enter author name">
+                    </div>
+                    <div class="form-group hidden" id="title-search">
+                        <label class="form-label">Book Title</label>
+                        <input type="text" class="form-input" id="search-title" placeholder="Enter book title">
+                    </div>
+                    <div class="form-group hidden" id="year-search">
+                        <label class="form-label">Publication Year</label>
+                        <input type="number" class="form-input" id="search-year" placeholder="e.g., 2023" min="1000" max="2024">
+                    </div>
+                    <div class="form-group hidden" id="price-min-search">
+                        <label class="form-label">Min Price</label>
+                        <input type="number" class="form-input" id="search-price-min" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="form-group hidden" id="price-max-search">
+                        <label class="form-label">Max Price</label>
+                        <input type="number" class="form-input" id="search-price-max" placeholder="999.99" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-primary" onclick="performSearch()">
+                            🔍 Search
+                        </button>
+                    </div>
+                </div>
+
+                <div id="search-results" class="hidden">
+                    <h3 style="margin: 2rem 0 1rem 0;">Search Results</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>ISBN</th>
+                                <th>Year</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="search-results-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div id="analytics-tab" class="tab-content hidden">
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h2 class="card-title">Low Stock Alert</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group" style="max-width: 200px; margin-bottom: 1rem;">
+                    <label class="form-label">Stock Threshold</label>
+                    <input type="number" class="form-input" id="stock-threshold" value="10" min="1" onchange="loadLowStockBooks()">
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="low-stock-table">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <div class="spinner"></div>
+                                Loading low stock books...
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Add/Edit Book Modal -->
+<div id="book-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Add New Book</h3>
+            <button class="modal-close" onclick="hideBookModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="book-form" onsubmit="saveBook(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Title *</label>
+                        <input type="text" class="form-input" id="book-title" required>
+                        <span class="form-error" id="title-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Author *</label>
+                        <input type="text" class="form-input" id="book-author" required>
+                        <span class="form-error" id="author-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ISBN *</label>
+                        <input type="text" class="form-input" id="book-isbn" required
+                               placeholder="978-0-123456-78-9">
+                        <span class="form-error" id="isbn-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Publication Year</label>
+                        <input type="number" class="form-input" id="book-year"
+                               min="1000" max="2024" placeholder="2023">
+                        <span class="form-error" id="year-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Price *</label>
+                        <input type="number" class="form-input" id="book-price"
+                               step="0.01" min="0.01" required placeholder="29.99">
+                        <span class="form-error" id="price-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stock Quantity *</label>
+                        <input type="number" class="form-input" id="book-stock"
+                               min="0" required placeholder="100">
+                        <span class="form-error" id="stock-error"></span>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="book-description"
+                                  placeholder="Book description..."></textarea>
+                        <span class="form-error" id="description-error"></span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="hideBookModal()">Cancel</button>
+            <button type="submit" form="book-form" class="btn btn-primary" id="save-book-btn">
+                💾 Save Book
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts Container -->
+<div id="alerts-container" style="position: fixed; top: 1rem; right: 1rem; z-index: 1100; max-width: 400px;"></div>
+
+<script>
+    // Global variables
+    // Auto-detect if we're running from Spring Boot or as standalone file
+    const isServedFromSpringBoot = window.location.port === '8080' && window.location.protocol === 'http:';
+    const API_BASE_URL = isServedFromSpringBoot ? '/api/v1' : 'http://localhost:8080/api/v1';
+    let currentPage = 0;
+    let currentEditingId = null;
+    let booksData = [];
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Application starting...');
+        console.log('Current URL:', window.location.href);
+        console.log('Detected Spring Boot serving:', isServedFromSpringBoot);
+        console.log('API Base URL:', API_BASE_URL);
+
+        // Show initial status
+        showAlert('info', `Attempting to connect to API at: ${API_BASE_URL}`);
+
+        // Test API connection first
+        testConnection().then(() => {
+            loadDashboard();
+            loadBooks();
+            loadLowStockBooks();
+        }).catch(error => {
+            console.error('Initial connection test failed:', error);
+            showConnectionHelp();
+        });
+    });
+
+    function showConnectionHelp() {
+        const helpMessage = `
+                <div style="max-width: 500px;">
+                    <h4>🔧 Connection Troubleshooting</h4>
+                    <ol style="text-align: left; margin: 1rem 0;">
+                        <li><strong>Start Spring Boot:</strong><br>
+                            <code>mvn spring-boot:run</code></li>
+                        <li><strong>Verify it's running:</strong><br>
+                            Open <a href="http://localhost:8080/swagger-ui.html" target="_blank">http://localhost:8080/swagger-ui.html</a></li>
+                        <li><strong>Check console logs</strong> for any Spring Boot errors</li>
+                        <li><strong>Ensure CORS is configured</strong> in your Spring Boot app</li>
+                    </ol>
+                    <p><strong>Current API URL:</strong> ${API_BASE_URL}</p>
+                </div>
+            `;
+
+        document.querySelector('#dashboard-tab .card-body').innerHTML = helpMessage;
+    }
+
+    // Test API connection
+    async function testConnection() {
+        try {
+            console.log('Testing API connection...');
+            console.log('Full URL:', `${window.location.origin}${API_BASE_URL}/books?page=0&size=1`);
+
+            showAlert('info', 'Testing API connection...');
+
+            const response = await fetch(`${API_BASE_URL}/books?page=0&size=1`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('Connection test response status:', response.status);
+            console.log('Response headers:', [...response.headers.entries()]);
+
+            if (!response.ok) {
+                const responseText = await response.text();
+                console.error('Response body:', responseText);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('Connection test successful:', data);
+            showAlert('success', `Connected to API successfully! Found ${data.totalElements || 0} books.`);
+            return data;
+
+        } catch (error) {
+            console.error('Connection test failed:', error);
+
+            // Provide specific error messages
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                showAlert('error', `Connection failed: Cannot reach ${window.location.origin}${API_BASE_URL}. Make sure Spring Boot is running on port 8080.`);
+            } else if (error.message.includes('404')) {
+                showAlert('error', 'API endpoint not found (404). Check if your BookController is properly configured.');
+            } else if (error.message.includes('CORS')) {
+                showAlert('error', 'CORS error. Make sure your CorsConfig is properly set up.');
+            } else {
+                showAlert('error', `API connection failed: ${error.message}`);
+            }
+
+            throw error;
+        }
+    }
+
+    // Tab management
+    function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
+
+        // Remove active class from all nav tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show selected tab
+        document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+        // Add active class to clicked nav tab
+        event.target.classList.add('active');
+
+        // Load data based on tab
+        switch(tabName) {
+            case 'dashboard':
+                loadDashboard();
+                break;
+            case 'books':
+                loadBooks();
+                break;
+            case 'analytics':
+                loadLowStockBooks();
+                break;
+        }
+    }
+
+    // API calls
+    async function apiCall(endpoint, options = {}) {
+        try {
+            console.log(`Making API call to: ${API_BASE_URL}${endpoint}`);
+            console.log('Options:', options);
+
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...options.headers
+                }
+            });
+
+            console.log(`Response status: ${response.status}`);
+            console.log(`Response headers:`, response.headers);
+
+            if (!response.ok) {
+                let errorMessage = `HTTP error! status: ${response.status}`;
+
+                // Try to get error details
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorData.details || errorMessage;
+
+                        // Handle validation errors
+                        if (errorData.validationErrors) {
+                            const validationError = new Error(errorMessage);
+                            validationError.validationErrors = errorData.validationErrors;
+                            throw validationError;
+                        }
+                    } catch (jsonError) {
+                        console.error('Failed to parse error response as JSON:', jsonError);
+                    }
+                } else {
+                    // Server returned HTML or other content (likely error page)
+                    const textResponse = await response.text();
+                    console.error('Server returned non-JSON response:', textResponse.substring(0, 200));
+                    errorMessage = `Server error (${response.status}). Check console for details.`;
+                }
+
+                throw new Error(errorMessage);
+            }
+
+            // Check if response is empty (for DELETE operations)
+            if (response.status === 204) {
+                return null;
+            }
+
+            // Try to parse JSON response
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            } else {
+                console.warn('Response is not JSON:', contentType);
+                return await response.text();
+            }
+
+        } catch (error) {
+            console.error('API call failed:', error);
+            console.error('Full error details:', {
+                endpoint,
+                options,
+                error: error.message,
+                stack: error.stack
+            });
+
+            // Don't show alert for validation errors - they'll be handled separately
+            if (!error.validationErrors) {
+                showAlert('error', `API Error: ${error.message}`);
+            }
+            throw error;
+        }
+    }
+
+    // Load dashboard data
+    async function loadDashboard() {
+        try {
+            const books = await apiCall('/books?page=0&size=1000');
+            const allBooks = books.content;
+
+            // Calculate stats
+            const totalBooks = allBooks.length;
+            const lowStockBooks = allBooks.filter(book => book.stockQuantity < 10);
+            const totalValue = allBooks.reduce((sum, book) => sum + (book.price * book.stockQuantity), 0);
+            const uniqueAuthors = new Set(allBooks.map(book => book.author)).size;
+
+            // Update stats
+            document.getElementById('total-books').textContent = totalBooks;
+            document.getElementById('low-stock-count').textContent = lowStockBooks.length;
+            document.getElementById('total-value').textContent = `$${totalValue.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('unique-authors').textContent = uniqueAuthors;
+
+            // Load recent books (last 5)
+            const recentBooks = allBooks.slice(-5).reverse();
+            renderRecentBooks(recentBooks);
+
+        } catch (error) {
+            console.error('Failed to load dashboard:', error);
+        }
+    }
+
+    // Load books with pagination
+    async function loadBooks() {
+        const sortField = document.getElementById('sort-field').value;
+        const sortDirection = document.getElementById('sort-direction').value;
+        const pageSize = document.getElementById('page-size').value;
+
+        try {
+            const endpoint = `/books?page=${currentPage}&size=${pageSize}&sortBy=${sortField}&sortDir=${sortDirection}`;
+            const data = await apiCall(endpoint);
+
+            booksData = data.content;
+            renderBooksTable(data.content);
+            renderPagination(data, 'books-pagination');
+            updatePaginationInfo(data, 'books-pagination-info');
+
+        } catch (error) {
+            console.error('Failed to load books:', error);
+            document.getElementById('books-table').innerHTML =
+                '<tr><td colspan="7" class="alert alert-error">Failed to load books. Please try again.</td></tr>';
+        }
+    }
+
+    // Render recent books for dashboard
+    function renderRecentBooks(books) {
+        const tbody = document.getElementById('recent-books');
+
+        if (books.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No books found</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = books.map(book => `
+                <tr>
+                    <td>${escapeHtml(book.title)}</td>
+                    <td>${escapeHtml(book.author)}</td>
+                    <td>${book.price.toFixed(2)}</td>
+                    <td>${book.stockQuantity}</td>
+                    <td>${getStockBadge(book.stockQuantity)}</td>
+                </tr>
+            `).join('');
+    }
+
+    // Render books table
+    function renderBooksTable(books) {
+        const tbody = document.getElementById('books-table');
+
+        if (books.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">No books found</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = books.map(book => `
+                <tr>
+                    <td>${escapeHtml(book.title)}</td>
+                    <td>${escapeHtml(book.author)}</td>
+                    <td>${escapeHtml(book.isbn)}</td>
+                    <td>${book.publishedYear || '-'}</td>
+                    <td>${book.price.toFixed(2)}</td>
+                    <td>${book.stockQuantity}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
+                            ✏️
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.id})" title="Delete">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    // Render search results
+    function renderSearchResults(books) {
+        const tbody = document.getElementById('search-results-table');
+
+        if (books.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">No books found matching your search criteria</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = books.map(book => `
+                <tr>
+                    <td>${escapeHtml(book.title)}</td>
+                    <td>${escapeHtml(book.author)}</td>
+                    <td>${escapeHtml(book.isbn)}</td>
+                    <td>${book.publishedYear || '-'}</td>
+                    <td>${book.price.toFixed(2)}</td>
+                    <td>${book.stockQuantity}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
+                            ✏️
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    // Load low stock books
+    async function loadLowStockBooks() {
+        const threshold = document.getElementById('stock-threshold').value;
+
+        try {
+            const books = await apiCall(`/books/low-stock?threshold=${threshold}`);
+            renderLowStockTable(books);
+        } catch (error) {
+            console.error('Failed to load low stock books:', error);
+            document.getElementById('low-stock-table').innerHTML =
+                '<tr><td colspan="6" class="alert alert-error">Failed to load low stock books. Please try again.</td></tr>';
+        }
+    }
+
+    // Render low stock table
+    function renderLowStockTable(books) {
+        const tbody = document.getElementById('low-stock-table');
+
+        if (books.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">No low stock books found</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = books.map(book => `
+                <tr>
+                    <td>${escapeHtml(book.title)}</td>
+                    <td>${escapeHtml(book.author)}</td>
+                    <td>${book.stockQuantity}</td>
+                    <td>${book.price.toFixed(2)}</td>
+                    <td>${getStockBadge(book.stockQuantity)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
+                            ✏️
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    // Pagination functions
+    function renderPagination(data, containerId) {
+        const container = document.getElementById(containerId);
+        const totalPages = data.totalPages;
+        const currentPageNum = data.number;
+
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = '';
+
+        // Previous button
+        if (currentPageNum > 0) {
+            paginationHTML += `<button class="btn btn-outline btn-sm" onclick="changePage(${currentPageNum - 1})">‹ Previous</button>`;
+        }
+
+        // Page numbers
+        const startPage = Math.max(0, currentPageNum - 2);
+        const endPage = Math.min(totalPages - 1, currentPageNum + 2);
+
+        if (startPage > 0) {
+            paginationHTML += `<button class="btn btn-outline btn-sm" onclick="changePage(0)">1</button>`;
+            if (startPage > 1) {
+                paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const isActive = i === currentPageNum ? 'btn-primary' : 'btn-outline';
+            paginationHTML += `<button class="btn ${isActive} btn-sm" onclick="changePage(${i})">${i + 1}</button>`;
+        }
+
+        if (endPage < totalPages - 1) {
+            if (endPage < totalPages - 2) {
+                paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+            }
+            paginationHTML += `<button class="btn btn-outline btn-sm" onclick="changePage(${totalPages - 1})">${totalPages}</button>`;
+        }
+
+        // Next button
+        if (currentPageNum < totalPages - 1) {
+            paginationHTML += `<button class="btn btn-outline btn-sm" onclick="changePage(${currentPageNum + 1})">Next ›</button>`;
+        }
+
+        container.innerHTML = paginationHTML;
+    }
+
+    function updatePaginationInfo(data, infoId) {
+        const info = document.getElementById(infoId);
+        const start = data.number * data.size + 1;
+        const end = Math.min((data.number + 1) * data.size, data.totalElements);
+        info.textContent = `Showing ${start}-${end} of ${data.totalElements} books`;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        loadBooks();
+    }
+
+    // Search functionality
+    function toggleSearchFields() {
+        const searchType = document.getElementById('search-type').value;
+
+        // Hide all search fields
+        document.querySelectorAll('[id$="-search"]').forEach(field => {
+            field.classList.add('hidden');
+        });
+
+        // Show relevant fields
+        switch(searchType) {
+            case 'keyword':
+                document.getElementById('keyword-search').classList.remove('hidden');
+                break;
+            case 'author':
+                document.getElementById('author-search').classList.remove('hidden');
+                break;
+            case 'title':
+                document.getElementById('title-search').classList.remove('hidden');
+                break;
+            case 'year':
+                document.getElementById('year-search').classList.remove('hidden');
+                break;
+            case 'price':
+                document.getElementById('price-min-search').classList.remove('hidden');
+                document.getElementById('price-max-search').classList.remove('hidden');
+                break;
+        }
+    }
+
+    async function performSearch() {
+        const searchType = document.getElementById('search-type').value;
+        let endpoint = '';
+        let params = new URLSearchParams();
+
+        try {
+            switch(searchType) {
+                case 'keyword':
+                    const keyword = document.getElementById('search-keyword').value.trim();
+                    if (!keyword) {
+                        showAlert('error', 'Please enter a keyword to search');
+                        return;
+                    }
+                    endpoint = '/books/search';
+                    params.append('keyword', keyword);
+                    params.append('page', '0');
+                    params.append('size', '50');
+                    break;
+
+                case 'author':
+                    const author = document.getElementById('search-author').value.trim();
+                    if (!author) {
+                        showAlert('error', 'Please enter an author name');
+                        return;
+                    }
+                    endpoint = '/books/search/author';
+                    params.append('author', author);
+                    break;
+
+                case 'title':
+                    const title = document.getElementById('search-title').value.trim();
+                    if (!title) {
+                        showAlert('error', 'Please enter a book title');
+                        return;
+                    }
+                    endpoint = '/books/search/title';
+                    params.append('title', title);
+                    break;
+
+                case 'year':
+                    const year = document.getElementById('search-year').value;
+                    if (!year) {
+                        showAlert('error', 'Please enter a publication year');
+                        return;
+                    }
+                    endpoint = `/books/year/${year}`;
+                    break;
+
+                case 'price':
+                    const minPrice = document.getElementById('search-price-min').value;
+                    const maxPrice = document.getElementById('search-price-max').value;
+                    if (!minPrice || !maxPrice) {
+                        showAlert('error', 'Please enter both minimum and maximum prices');
+                        return;
+                    }
+                    if (parseFloat(minPrice) > parseFloat(maxPrice)) {
+                        showAlert('error', 'Minimum price cannot be greater than maximum price');
+                        return;
+                    }
+                    endpoint = '/books/price-range';
+                    params.append('minPrice', minPrice);
+                    params.append('maxPrice', maxPrice);
+                    break;
+            }
+
+            const url = params.toString() ? `${endpoint}?${params.toString()}` : endpoint;
+            const data = await apiCall(url);
+
+            // Handle both paginated and non-paginated responses
+            const books = data.content || data;
+            renderSearchResults(books);
+            document.getElementById('search-results').classList.remove('hidden');
+
+            if (books.length === 0) {
+                showAlert('info', 'No books found matching your search criteria');
+            } else {
+                showAlert('success', `Found ${books.length} book(s) matching your criteria`);
+            }
+
+        } catch (error) {
+            console.error('Search failed:', error);
+            showAlert('error', 'Search failed. Please try again.');
+        }
+    }
+
+    // Modal functions
+    function showAddBookModal() {
+        currentEditingId = null;
+        document.getElementById('modal-title').textContent = 'Add New Book';
+        document.getElementById('save-book-btn').innerHTML = '💾 Save Book';
+        clearForm();
+        document.getElementById('book-modal').classList.remove('hidden');
+    }
+
+    function hideBookModal() {
+        document.getElementById('book-modal').classList.add('hidden');
+        clearForm();
+        clearErrors();
+    }
+
+    async function editBook(id) {
+        try {
+            const book = await apiCall(`/books/${id}`);
+            currentEditingId = id;
+
+            document.getElementById('modal-title').textContent = 'Edit Book';
+            document.getElementById('save-book-btn').innerHTML = '💾 Update Book';
+
+            // Populate form
+            document.getElementById('book-title').value = book.title;
+            document.getElementById('book-author').value = book.author;
+            document.getElementById('book-isbn').value = book.isbn;
+            document.getElementById('book-year').value = book.publishedYear || '';
+            document.getElementById('book-price').value = book.price;
+            document.getElementById('book-stock').value = book.stockQuantity;
+            document.getElementById('book-description').value = book.description || '';
+
+            document.getElementById('book-modal').classList.remove('hidden');
+
+        } catch (error) {
+            console.error('Failed to load book for editing:', error);
+            showAlert('error', 'Failed to load book details');
+        }
+    }
+
+    async function saveBook(event) {
+        event.preventDefault();
+        clearErrors();
+
+        // Validate form data
+        const title = document.getElementById('book-title').value.trim();
+        const author = document.getElementById('book-author').value.trim();
+        const isbn = document.getElementById('book-isbn').value.trim();
+        const price = document.getElementById('book-price').value;
+        const stock = document.getElementById('book-stock').value;
+
+        if (!title || !author || !isbn || !price || !stock) {
+            showAlert('error', 'Please fill in all required fields');
+            return;
+        }
+
+        const bookData = {
+            title: title,
+            author: author,
+            isbn: isbn,
+            publishedYear: document.getElementById('book-year').value ? parseInt(document.getElementById('book-year').value) : null,
+            price: parseFloat(price),
+            stockQuantity: parseInt(stock),
+            description: document.getElementById('book-description').value.trim() || null
+        };
+
+        console.log('Saving book data:', bookData);
+
+        try {
+            const endpoint = currentEditingId ? `/books/${currentEditingId}` : '/books';
+            const method = currentEditingId ? 'PUT' : 'POST';
+
+            console.log(`Making ${method} request to ${endpoint}`);
+
+            const response = await apiCall(endpoint, {
+                method,
+                body: JSON.stringify(bookData)
+            });
+
+            console.log('Save response:', response);
+
+            const action = currentEditingId ? 'updated' : 'created';
+            showAlert('success', `Book ${action} successfully!`);
+            hideBookModal();
+
+            // Refresh data
+            await refreshData();
+
+        } catch (error) {
+            console.error('Failed to save book:', error);
+
+            // Handle validation errors
+            if (error.validationErrors) {
+                handleValidationErrors(error);
+            } else {
+                showAlert('error', `Failed to save book: ${error.message}`);
+            }
+        }
+    }
+
+    async function deleteBook(id) {
+        if (!confirm('Are you sure you want to delete this book? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            await apiCall(`/books/${id}`, { method: 'DELETE' });
+            showAlert('success', 'Book deleted successfully!');
+
+            // Refresh data
+            loadDashboard();
+            loadBooks();
+            loadLowStockBooks();
+
+        } catch (error) {
+            console.error('Failed to delete book:', error);
+            showAlert('error', 'Failed to delete book. Please try again.');
+        }
+    }
+
+    // Utility functions
+    function clearForm() {
+        document.getElementById('book-form').reset();
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.form-error').forEach(error => {
+            error.textContent = '';
+        });
+    }
+
+    function handleValidationErrors(error) {
+        console.log('Handling validation errors:', error);
+
+        // Clear previous errors
+        clearErrors();
+
+        // If the error has validation details, show them
+        if (error.validationErrors && Array.isArray(error.validationErrors)) {
+            error.validationErrors.forEach(validationError => {
+                console.log('Processing validation error:', validationError);
+
+                // Parse "field: message" format
+                const colonIndex = validationError.indexOf(':');
+                if (colonIndex > 0) {
+                    const field = validationError.substring(0, colonIndex).trim();
+                    const message = validationError.substring(colonIndex + 1).trim();
+
+                    const errorElement = document.getElementById(`${field}-error`);
+                    if (errorElement) {
+                        errorElement.textContent = message;
+                    } else {
+                        console.warn(`Error element not found for field: ${field}`);
+                    }
+                }
+            });
+
+            showAlert('error', 'Please correct the validation errors and try again.');
+        } else {
+            showAlert('error', error.message || 'Failed to save book. Please check your input and try again.');
+        }
+    }
+
+    function getStockBadge(stockQuantity) {
+        if (stockQuantity === 0) {
+            return '<span class="badge badge-danger">Out of Stock</span>';
+        } else if (stockQuantity < 10) {
+            return '<span class="badge badge-warning">Low Stock</span>';
+        } else {
+            return '<span class="badge badge-success">In Stock</span>';
+        }
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Alert system
+    function showAlert(type, message) {
+        const alertsContainer = document.getElementById('alerts-container');
+        const alertId = 'alert-' + Date.now();
+
+        const alertHTML = `
+                <div id="${alertId}" class="alert alert-${type}" style="margin-bottom: 0.5rem;">
+                    ${getAlertIcon(type)} ${message}
+                    <button onclick="dismissAlert('${alertId}')" style="background: none; border: none; float: right; cursor: pointer; font-weight: bold;">&times;</button>
+                </div>
+            `;
+
+        alertsContainer.insertAdjacentHTML('beforeend', alertHTML);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            dismissAlert(alertId);
+        }, 5000);
+    }
+
+    function getAlertIcon(type) {
+        switch(type) {
+            case 'success': return '✅';
+            case 'error': return '❌';
+            case 'warning': return '⚠️';
+            case 'info': return 'ℹ️';
+            default: return '';
+        }
+    }
+
+    function dismissAlert(alertId) {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.remove();
+        }
+    }
+
+    // Refresh data
+    async function refreshData() {
+        try {
+            showAlert('info', 'Refreshing data...');
+
+            // Run all refreshes in parallel
+            await Promise.all([
+                loadDashboard(),
+                loadBooks(),
+                loadLowStockBooks()
+            ]);
+
+            console.log('Data refresh completed');
+        } catch (error) {
+            console.error('Failed to refresh data:', error);
+            showAlert('error', 'Failed to refresh some data. Please try again.');
+        }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(event) {
+        // Escape key to close modal
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('book-modal');
+            if (!modal.classList.contains('hidden')) {
+                hideBookModal();
+            }
+        }
+
+        // Ctrl/Cmd + N to add new book
+        if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+            event.preventDefault();
+            showAddBookModal();
+        }
+
+        // Ctrl/Cmd + R to refresh
+        if ((event.ctrlKey || event.metaKey) && event.key === 'r') {
+            event.preventDefault();
+            refreshData();
+        }
+    });
+
+    // Handle form submission in search
+    document.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            const activeTab = document.querySelector('.tab-content:not(.hidden)');
+            if (activeTab && activeTab.id === 'search-tab') {
+                const target = event.target;
+                if (target.matches('#search-keyword, #search-author, #search-title, #search-year, #search-price-min, #search-price-max')) {
+                    event.preventDefault();
+                    performSearch();
+                }
+            }
+        }
+    });
+
+    // Initialize search fields visibility
+    toggleSearchFields();
+</script>
+</body>
+</html>
