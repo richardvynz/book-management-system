@@ -1,419 +1,340 @@
-# 📚 Book Management System - RESTful API
+# 📚 Book Management System
 
-A production-ready RESTful API built with Spring Boot, demonstrating industry best practices for API design, implementation, and documentation. This project showcases comprehensive CRUD operations, advanced search capabilities, robust error handling, and complete API documentation.
+A comprehensive full-stack web application for managing book inventory with a modern REST API and intuitive frontend interface.
 
-![Java](https://img.shields.io/badge/Java-17-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.1.5-brightgreen)
-![Maven](https://img.shields.io/badge/Maven-3.8+-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![API](https://img.shields.io/badge/API-RESTful-success)
+## 🌟 Features
 
-## 🎯 Assessment Deliverables
+### 📊 **Dashboard & Analytics**
+- Real-time statistics (total books, low stock alerts, inventory value)
+- Recent books overview
+- Low stock monitoring with customizable thresholds
+- Visual status indicators for stock levels
 
-This project fulfills all requirements for RESTful API design best practices:
+### 🔍 **Advanced Search & Filtering**
+- Keyword search across title, author, and description
+- Search by specific author or title
+- Filter by publication year
+- Price range filtering
+- Real-time search results
 
-✅ **Complete API Implementation** - 11+ endpoints with full CRUD operations following REST principles  
-✅ **Comprehensive API Documentation** - Interactive OpenAPI/Swagger documentation with detailed specifications  
-✅ **Postman Testing Suite** - Complete collection with 15+ requests, automated tests, and error scenarios  
-✅ **Robust Error Handling** - Global exception management with proper HTTP status codes and detailed responses  
-✅ **Industry-Standard Code Organization** - Clean architecture with proper separation of concerns
+### 📖 **Book Management**
+- Complete CRUD operations (Create, Read, Update, Delete)
+- Form validation with detailed error messages
+- Bulk operations support
+- Pagination and sorting capabilities
 
-## 🏗️ API Architecture
+### 🎨 **Modern User Interface**
+- Responsive design for desktop and mobile
+- Professional dark/light theme
+- Intuitive navigation with tab-based interface
+- Real-time connection status monitoring
+- Keyboard shortcuts for power users
 
-### REST Endpoints Overview
+## 🛠 **Technical Stack**
 
-| Method | Endpoint | Description | Status Codes |
-|--------|----------|-------------|--------------|
-| `GET` | `/api/v1/books` | Retrieve all books (paginated) | 200, 500 |
-| `POST` | `/api/v1/books` | Create a new book | 201, 400, 409 |
-| `GET` | `/api/v1/books/{id}` | Retrieve book by ID | 200, 404 |
-| `PUT` | `/api/v1/books/{id}` | Update existing book | 200, 400, 404 |
-| `DELETE` | `/api/v1/books/{id}` | Delete book | 204, 404 |
+### **Backend**
+- **Framework**: Spring Boot 3.x
+- **Database**: H2 Database (in-memory for development)
+- **ORM**: JPA/Hibernate
+- **API Documentation**: Swagger/OpenAPI 3
+- **Build Tool**: Maven
+- **Java Version**: 17+
 
-### Advanced Search Capabilities
+### **Frontend**
+- **Languages**: HTML5, CSS3, Vanilla JavaScript
+- **Styling**: Modern CSS with CSS Variables
+- **Design**: Responsive Grid/Flexbox Layout
+- **Icons**: Unicode Emojis for universal compatibility
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/v1/books/search?keyword={term}` | Multi-field keyword search |
-| `GET` | `/api/v1/books/search/author?name={author}` | Search by author name |
-| `GET` | `/api/v1/books/search/title?title={title}` | Search by book title |
-| `GET` | `/api/v1/books/year/{year}` | Filter by publication year |
-| `GET` | `/api/v1/books/price-range?min={min}&max={max}` | Price range filtering |
-| `GET` | `/api/v1/books/low-stock?threshold={threshold}` | Low inventory alerts |
+### **API Features**
+- RESTful endpoints following industry standards
+- Comprehensive error handling
+- CORS configuration for cross-origin requests
+- Input validation and sanitization
+- Paginated responses for large datasets
 
-## 🚀 Quick Start
+## 🚀 **Quick Start**
 
-### Prerequisites
+### **Prerequisites**
+- Java 17 or higher
+- Maven 3.6+
+- Git
 
-- **Java 17** or higher
-- **Maven 3.8+**
-- **Git** for version control
-
-### Installation and Setup
+### **Installation & Setup**
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/richardvynz/book-management-system.git
+   git clone https://github.com/yourusername/book-management-system.git
    cd book-management-system
    ```
 
 2. **Build and run the application**
    ```bash
-   # Using Maven Wrapper (recommended)
-   ./mvnw spring-boot:run
-   
-   # Or using Maven directly
+   mvn clean install
    mvn spring-boot:run
    ```
 
-3. **Verify the application is running**
-   ```bash
-   curl http://localhost:8080/api/v1/books
-   ```
+3. **Access the application**
+   - **Frontend**: http://localhost:8080/
+   - **API Documentation**: http://localhost:8080/swagger-ui.html
+   - **H2 Database Console**: http://localhost:8080/h2-console
 
-### Access Points
+### **Default Database Configuration**
+- **JDBC URL**: `jdbc:h2:mem:testdb`
+- **Username**: `sa`
+- **Password**: *(empty)*
 
-- **🌐 Application**: http://localhost:8080
-- **📖 API Documentation (Swagger UI)**: http://localhost:8080/swagger-ui.html
-- **📋 OpenAPI Specification**: http://localhost:8080/v3/api-docs
-- **🗄️ H2 Database Console**: http://localhost:8080/h2-console
+## 📚 **API Documentation**
 
-## 📖 API Documentation
+### **Base URL**: `http://localhost:8080/api/v1`
 
-### Request/Response Examples
+### **Core Endpoints**
 
-**Create a Book (POST /api/v1/books)**
-```json
-{
-  "title": "Clean Code",
-  "author": "Robert C. Martin",
-  "isbn": "978-0-13-235088-4",
-  "publishedYear": 2008,
-  "price": 45.99,
-  "stockQuantity": 25,
-  "description": "A handbook of agile software craftsmanship"
-}
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/books` | Get all books (paginated) |
+| `GET` | `/books/{id}` | Get book by ID |
+| `POST` | `/books` | Create new book |
+| `PUT` | `/books/{id}` | Update existing book |
+| `DELETE` | `/books/{id}` | Delete book |
 
-**Successful Response (201 Created)**
-```json
-{
-  "id": 1,
-  "title": "Clean Code",
-  "author": "Robert C. Martin",
-  "isbn": "978-0-13-235088-4",
-  "publishedYear": 2008,
-  "price": 45.99,
-  "stockQuantity": 25,
-  "description": "A handbook of agile software craftsmanship",
-  "createdAt": "2024-01-15T10:30:00",
-  "updatedAt": "2024-01-15T10:30:00"
-}
-```
+### **Search Endpoints**
 
-### Error Response Format
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/books/search?keyword={term}` | Search books by keyword |
+| `GET` | `/books/search/author?author={name}` | Find books by author |
+| `GET` | `/books/search/title?title={title}` | Find books by title |
+| `GET` | `/books/year/{year}` | Find books by publication year |
+| `GET` | `/books/price-range?minPrice={min}&maxPrice={max}` | Find books by price range |
+| `GET` | `/books/low-stock?threshold={number}` | Get low stock books |
 
-All API errors follow a consistent format with appropriate HTTP status codes:
+### **Query Parameters**
+- `page`: Page number (0-based)
+- `size`: Page size (default: 10)
+- `sortBy`: Sort field (title, author, price, publishedYear, stockQuantity)
+- `sortDir`: Sort direction (asc, desc)
 
-```json
-{
-  "status": 400,
-  "message": "Validation Failed",
-  "details": "The request contains invalid data",
-  "timestamp": "2024-01-15T10:30:00.123Z",
-  "path": "/api/v1/books",
-  "validationErrors": [
-    "title: Title is required and cannot be blank",
-    "isbn: ISBN format is invalid (expected: XXX-X-XX-XXXXXX-X)"
-  ]
-}
-```
-
-**Common HTTP Status Codes:**
-- `200 OK` - Successful GET/PUT operations
-- `201 Created` - Successful POST operations
-- `204 No Content` - Successful DELETE operations
-- `400 Bad Request` - Validation errors or malformed requests
-- `404 Not Found` - Resource not found
-- `409 Conflict` - Business rule violations (e.g., duplicate ISBN)
-- `500 Internal Server Error` - Unexpected server errors
-
-## 📮 API Testing with Postman
-
-### Quick Setup
-1. **Import Collection & Environment**
-   ```
-   Files located in /postman directory:
-   ├── Book-Management-API.postman_collection.json
-   └── Book-Management-Environment.postman_environment.json
-   ```
-
-2. **Import in Postman**
-   - Open Postman → Import → Upload Files
-   - Select both files from `/postman` directory
-   - Choose "Book Management Environment" from environment dropdown
-
-3. **Start Testing**
-   ```bash
-   # Start the API server
-   mvn spring-boot:run
-   
-   # API will be available at http://localhost:8080
-   # Then run the Postman collection
-   ```
-
-### 🎯 Collection Features
-
-✅ **Complete CRUD Operations** - All REST endpoints with automated tests  
-✅ **Advanced Search Testing** - Keyword, author, title, and filter endpoints  
-✅ **Error Scenario Coverage** - 400 (Bad Request), 404 (Not Found), 409 (Conflict)  
-✅ **Automated Variable Management** - Dynamic ID storage for dependent requests  
-✅ **Response Validation** - Comprehensive assertions for all responses  
-✅ **Business Logic Testing** - Validates data integrity and constraints
-
-### 📊 Automated Test Coverage
-
-Each request includes automated test scripts that verify:
-- **HTTP Status Codes** - Proper REST response codes
-- **Response Structure** - JSON schema validation
-- **Data Types & Formats** - Field validation (dates, numbers, strings)
-- **Business Rules** - ISBN uniqueness, required fields, data constraints
-- **Error Messages** - Proper error response format and details
-
-## 🧪 Testing
-
-### Run Tests
+### **Example API Calls**
 
 ```bash
-# Run unit tests
+# Get all books with pagination
+curl "http://localhost:8080/api/v1/books?page=0&size=10&sortBy=title&sortDir=asc"
+
+# Search for books
+curl "http://localhost:8080/api/v1/books/search?keyword=java&page=0&size=5"
+
+# Create a new book
+curl -X POST "http://localhost:8080/api/v1/books" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Clean Code",
+    "author": "Robert C. Martin",
+    "isbn": "978-0132350884",
+    "publishedYear": 2008,
+    "price": 39.99,
+    "stockQuantity": 25,
+    "description": "A Handbook of Agile Software Craftsmanship"
+  }'
+```
+
+## 🗂 **Project Structure**
+
+```
+book-management-system/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/example/bookmanagement/
+│   │   │       ├── BookManagementApplication.java
+│   │   │       ├── config/
+│   │   │       │   ├── CorsConfig.java
+│   │   │       │   └── SwaggerConfig.java
+│   │   │       ├── controller/
+│   │   │       │   └── BookController.java
+│   │   │       ├── dto/
+│   │   │       │   └── BookDTO.java
+│   │   │       ├── entity/
+│   │   │       │   └── Book.java
+│   │   │       ├── exception/
+│   │   │       │   ├── BookNotFoundException.java
+│   │   │       │   └── GlobalExceptionHandler.java
+│   │   │       ├── repository/
+│   │   │       │   └── BookRepository.java
+│   │   │       └── service/
+│   │   │           ├── BookService.java
+│   │   │           └── BookServiceImpl.java
+│   │   └── resources/
+│   │       ├── static/
+│   │       │   └── index.html
+│   │       └── application.properties
+│   └── test/
+│       └── java/
+│           └── com/example/bookmanagement/
+│               ├── BookManagementApplicationTests.java
+│               ├── controller/
+│               │   └── BookControllerTest.java
+│               └── service/
+│                   └── BookServiceTest.java
+├── target/
+├── pom.xml
+└── README.md
+```
+
+## 🔧 **Configuration**
+
+### **Application Properties**
+```properties
+# Server Configuration
+server.port=8080
+
+# Database Configuration (H2 In-Memory)
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# H2 Console (Development only)
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# JPA Configuration
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+
+# Swagger Configuration
+springdoc.api-docs.path=/api-docs
+springdoc.swagger-ui.path=/swagger-ui.html
+```
+
+## 🧪 **Testing**
+
+### **Run Tests**
+```bash
+# Run all tests
 mvn test
 
-# Run integration tests
-mvn verify
-
-# Run tests with coverage report
-mvn clean test jacoco:report
+# Run with coverage
+mvn test jacoco:report
 
 # Run specific test class
 mvn test -Dtest=BookControllerTest
 ```
 
-### Test Coverage
+### **Test Coverage**
+- Unit tests for service layer
+- Integration tests for REST endpoints
+- Repository tests for data access
+- Validation tests for input handling
 
-- **Unit Tests**: Service layer business logic and validation
-- **Integration Tests**: Complete API endpoint testing with test database
-- **Repository Tests**: Data access layer validation
-- **Controller Tests**: HTTP request/response handling
+## 🚀 **Deployment**
 
-## 🏗️ Project Structure
-
-```
-src/
-├── main/
-│   ├── java/com/richardvinz/Book_Management_App/
-│   │   ├── controller/          # REST API Controllers
-│   │   │   ├── BookController.java
-│   │   │   └── WebController.java
-│   │   ├── service/             # Business Logic Layer
-│   │   │   ├── BookService.java
-│   │   │   └── BookServiceImpl.java
-│   │   ├── repository/          # Data Access Layer
-│   │   │   └── BookRepository.java
-│   │   ├── entity/              # JPA Entities
-│   │   │   └── Book.java
-│   │   ├── dto/                 # Data Transfer Objects
-│   │   │   ├── BookRequestDto.java
-│   │   │   ├── BookResponseDto.java
-│   │   │   └── ErrorResponseDto.java
-│   │   ├── exception/           # Exception Handling
-│   │   │   ├── BookNotFoundException.java
-│   │   │   ├── DuplicateIsbnException.java
-│   │   │   └── GlobalExceptionHandler.java
-│   │   ├── config/              # Configuration Classes
-│   │   │   ├── CorsConfig.java
-│   │   │   └── OpenApiConfig.java
-│   │   └── BookManagementAppApplication.java
-│   ├── resources/
-│   │   ├── static/              # Frontend Assets (Bonus)
-│   │   │   └── index.html
-│   │   └── application.yml      # Application Configuration
-└── test/                        # Test Classes
-    ├── controller/              # Controller Tests
-    ├── service/                 # Service Tests
-    └── repository/              # Repository Tests
-```
-
-## ⚙️ Configuration
-
-### Application Properties (application.yml)
-
-```yaml
-server:
-  port: 8080
-
-spring:
-  application:
-    name: book-management-api
-  datasource:
-    url: jdbc:h2:mem:bookdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-
-logging:
-  level:
-    com.richardvinz.Book_Management_App: DEBUG
-    org.springframework.web: DEBUG
-```
-
-### Database Configuration
-
-- **Development**: H2 in-memory database
-- **Connection URL**: `jdbc:h2:mem:bookdb`
-- **Console Access**: http://localhost:8080/h2-console
-- **Credentials**: username: `sa`, password: `password`
-
-## 🔧 Technology Stack
-
-### Core Dependencies
-
-- **Spring Boot 3.1.5** - Application framework and REST capabilities
-- **Spring Data JPA** - Data persistence and repository abstraction
-- **Spring Boot Validation** - Bean validation with Hibernate Validator
-- **H2 Database** - In-memory database for development and testing
-- **SpringDoc OpenAPI** - API documentation generation
-- **Lombok** - Boilerplate code reduction
-
-### Testing Dependencies
-
-- **Spring Boot Test** - Testing framework with TestContainers support
-- **JUnit 5** - Unit testing framework
-- **Mockito** - Mocking framework for unit tests
-- **REST Assured** - API testing and validation
-- **Testcontainers** - Integration testing with real databases
-
-### Build and DevOps
-
-- **Maven 3.8+** - Dependency management and build automation
-- **Maven Wrapper** - Ensures consistent Maven version across environments
-- **JaCoCo** - Code coverage reporting
-- **Spring Boot Maven Plugin** - Application packaging and execution
-
-## 🚀 Production Deployment
-
-### Build Production JAR
-
+### **Development**
 ```bash
-# Clean build with tests
+mvn spring-boot:run
+```
+
+### **Production Build**
+```bash
 mvn clean package
-
-# Skip tests for faster builds (not recommended)
-mvn clean package -DskipTests
-
-# Build with specific profile
-mvn clean package -Pprod
+java -jar target/book-management-system-1.0.0.jar
 ```
 
-### Run Production Application
-
-```bash
-# Run with default profile
-java -jar target/book-management-api-1.0.0.jar
-
-# Run with production profile
-java -jar target/book-management-api-1.0.0.jar --spring.profiles.active=prod
-
-# Run with custom port
-java -jar target/book-management-api-1.0.0.jar --server.port=9090
+### **Docker (Optional)**
+```dockerfile
+FROM openjdk:17-jre-slim
+COPY target/book-management-system-1.0.0.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app.jar"]
 ```
 
-### Environment Configuration
+## 🎯 **Usage Examples**
 
-For production deployment, override default configurations:
+### **Frontend Interface**
+1. Open http://localhost:8080/ in your browser
+2. Use the dashboard to view statistics and recent books
+3. Navigate to "Books" tab to view, add, edit, or delete books
+4. Use "Search" tab for advanced filtering
+5. Check "Analytics" tab for low stock monitoring
 
-```bash
-# Environment variables
-export SPRING_PROFILES_ACTIVE=prod
-export SERVER_PORT=8080
-export DATABASE_URL=jdbc:postgresql://localhost:5432/bookdb
-export DATABASE_USERNAME=bookuser
-export DATABASE_PASSWORD=securepassword
-
-# Or use application-prod.yml
+### **API Testing with Postman**
+Import the following collection URL:
+```
+http://localhost:8080/api-docs
 ```
 
-## 📊 API Performance and Monitoring
+### **Keyboard Shortcuts**
+- `Ctrl+N` / `Cmd+N`: Add new book
+- `Ctrl+R` / `Cmd+R`: Refresh data
+- `Escape`: Close modal dialogs
+- `Enter`: Submit search forms
 
-### Health Checks
+## 🛡 **Security Features**
 
-```bash
-# Application health
-curl http://localhost:8080/actuator/health
+- Input validation and sanitization
+- SQL injection prevention through JPA
+- XSS protection with proper HTML escaping
+- CORS configuration for secure cross-origin requests
+- Error handling without information disclosure
 
-# Application info
-curl http://localhost:8080/actuator/info
+## 🐛 **Troubleshooting**
 
-# Metrics
-curl http://localhost:8080/actuator/metrics
-```
+### **Common Issues**
 
-### Pagination and Performance
+1. **Connection Failed**
+   - Ensure Spring Boot is running: `mvn spring-boot:run`
+   - Check port 8080 is not in use: `netstat -an | grep 8080`
+   - Access frontend via http://localhost:8080/ (not IDE server)
 
-- **Default Page Size**: 10 items
-- **Maximum Page Size**: 100 items
-- **Database Indexing**: Optimized queries for search operations
-- **Response Time**: < 200ms for CRUD operations
+2. **Database Issues**
+   - H2 console: http://localhost:8080/h2-console
+   - Check JDBC URL: `jdbc:h2:mem:testdb`
+   - Username: `sa`, Password: (empty)
 
-## 🎁 Bonus Features
+3. **API Documentation**
+   - Swagger UI: http://localhost:8080/swagger-ui.html
+   - API Docs JSON: http://localhost:8080/api-docs
 
-### Web Frontend
+4. **CORS Errors**
+   - Access frontend through Spring Boot (port 8080)
+   - Check CorsConfig.java configuration
+   - Avoid accessing from IDE development servers
 
-A responsive web interface is included to demonstrate real-world API usage:
+## 🤝 **Contributing**
 
-- **Access**: http://localhost:8080/
-- **Features**: Complete CRUD operations, advanced search, analytics dashboard
-- **Technology**: Vanilla HTML5, CSS3, and JavaScript (ES6+)
-- **Responsive**: Mobile-first design supporting all device sizes
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📄 License
+## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
+## 👨‍💻 **Author**
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/awesome-feature`)
-3. Commit your changes (`git commit -m 'Add awesome feature'`)
-4. Push to the branch (`git push origin feature/awesome-feature`)
-5. Open a Pull Request
+**Your Name**
+- GitHub: [@yourusername](https://github.com/yourusername)
+- Email: your.email@example.com
 
-## 📞 Support
+## 🙏 **Acknowledgments**
 
-For questions, issues, or suggestions:
-
-- **Repository Issues**: [GitHub Issues](https://github.com/richardvynz/book-management-system/issues)
-- **Documentation**: [Wiki](https://github.com/richardvynz/book-management-system/wiki)
-- **API Documentation**: [Swagger UI](http://localhost:8080/swagger-ui.html)
+- Spring Boot team for the excellent framework
+- H2 Database for providing an easy-to-use in-memory database
+- Swagger/OpenAPI for comprehensive API documentation
+- The open-source community for inspiration and best practices
 
 ---
 
-**This RESTful API demonstrates comprehensive adherence to industry best practices and serves as a reference implementation for modern API development with Spring Boot.**
+## 📞 **Support**
+
+If you encounter any issues or have questions:
+
+1. Check the [troubleshooting section](#-troubleshooting)
+2. Review the [API documentation](#-api-documentation)
+3. Open an issue on GitHub
+4. Contact the development team
+
+**Happy coding! 🚀**

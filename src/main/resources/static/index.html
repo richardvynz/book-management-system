@@ -472,6 +472,25 @@
             background: #fef2f2;
             color: #dc2626;
         }
+
+        /* Connection status indicator */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger-color);
+        }
+
+        .status-indicator.connected {
+            background: var(--success-color);
+        }
     </style>
 </head>
 <body>
@@ -481,6 +500,10 @@
         <div class="header-content">
             <div class="logo">Book Management System</div>
             <div class="header-actions">
+                <div class="connection-status">
+                    <div class="status-indicator" id="connection-indicator"></div>
+                    <span id="connection-status">Connecting...</span>
+                </div>
                 <button class="btn btn-primary" onclick="showAddBookModal()">
                     ➕ Add Book
                 </button>
@@ -797,97 +820,127 @@
 <div id="alerts-container" style="position: fixed; top: 1rem; right: 1rem; z-index: 1100; max-width: 400px;"></div>
 
 <script>
-    // Global variables
-    // Auto-detect if we're running from Spring Boot or as standalone file
-    const isServedFromSpringBoot = window.location.port === '8080' && window.location.protocol === 'http:';
-    const API_BASE_URL = isServedFromSpringBoot ? '/api/v1' : 'http://localhost:8080/api/v1';
+    // Global variables - FIXED API DETECTION
+    const isSpringBootServed = window.location.port === '8080';
+    const API_BASE_URL = isSpringBootServed
+        ? '/api/v1' : 'http://localhost:8080/api/v1';
     let currentPage = 0;
     let currentEditingId = null;
     let booksData = [];
+    let isConnected = false;
 
     // Initialize the application
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Application starting...');
         console.log('Current URL:', window.location.href);
-        console.log('Detected Spring Boot serving:', isServedFromSpringBoot);
         console.log('API Base URL:', API_BASE_URL);
 
-        // Show initial status
-        showAlert('info', `Attempting to connect to API at: ${API_BASE_URL}`);
+        updateConnectionStatus(false, 'Connecting...');
 
         // Test API connection first
-        testConnection().then(() => {
-            loadDashboard();
-            loadBooks();
-            loadLowStockBooks();
-        }).catch(error => {
-            console.error('Initial connection test failed:', error);
-            showConnectionHelp();
-        });
+        testConnection()
+            .then(() => {
+                updateConnectionStatus(true, 'Connected');
+                loadDashboard();
+                loadBooks();
+                loadLowStockBooks();
+            })
+            .catch(error => {
+                console.error('Initial connection test failed:', error);
+                updateConnectionStatus(false, 'Connection Failed');
+                showConnectionHelp();
+            });
     });
+
+    function updateConnectionStatus(connected, message) {
+        isConnected = connected;
+        const indicator = document.getElementById('connection-indicator');
+        const status = document.getElementById('connection-status');
+
+        if (connected) {
+            indicator.classList.add('connected');
+        } else {
+            indicator.classList.remove('connected');
+        }
+
+        status.textContent = message;
+    }
 
     function showConnectionHelp() {
         const helpMessage = `
-                <div style="max-width: 500px;">
-                    <h4>🔧 Connection Troubleshooting</h4>
+            <div style="max-width: 500px;">
+                <div class="alert alert-error">
+                    <h4>🔧 Connection Error</h4>
+                    <p>Cannot connect to the Book Management API. Please ensure:</p>
                     <ol style="text-align: left; margin: 1rem 0;">
                         <li><strong>Start Spring Boot:</strong><br>
                             <code>mvn spring-boot:run</code></li>
                         <li><strong>Verify it's running:</strong><br>
-                            Open <a href="http://localhost:8080/swagger-ui.html" target="_blank">http://localhost:8080/swagger-ui.html</a></li>
+                            Open <a href="http://localhost:8080/swagger-ui.html" target="_blank" style="color: var(--primary-color);">Swagger UI</a></li>
                         <li><strong>Check console logs</strong> for any Spring Boot errors</li>
-                        <li><strong>Ensure CORS is configured</strong> in your Spring Boot app</li>
+                        <li><strong>Verify CORS is configured</strong> in your Spring Boot app</li>
                     </ol>
-                    <p><strong>Current API URL:</strong> ${API_BASE_URL}</p>
+                    <p><strong>Current API URL:</strong> ${window.location.origin}${API_BASE_URL}</p>
+                    <button class="btn btn-primary" onclick="testConnection().then(() => location.reload())">
+                        🔄 Retry Connection
+                    </button>
                 </div>
-            `;
+            </div>
+        `;
 
         document.querySelector('#dashboard-tab .card-body').innerHTML = helpMessage;
     }
 
-    // Test API connection
+    // Test API connection - IMPROVED VERSION
     async function testConnection() {
         try {
             console.log('Testing API connection...');
-            console.log('Full URL:', `${window.location.origin}${API_BASE_URL}/books?page=0&size=1`);
+            updateConnectionStatus(false, 'Testing...');
 
-            showAlert('info', 'Testing API connection...');
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
             const response = await fetch(`${API_BASE_URL}/books?page=0&size=1`, {
                 method: 'GET',
                 headers: {
-                    'Accept': 'application/json'
-                }
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache'
+                },
+                signal: controller.signal
             });
 
+            clearTimeout(timeoutId);
+
             console.log('Connection test response status:', response.status);
-            console.log('Response headers:', [...response.headers.entries()]);
 
             if (!response.ok) {
-                const responseText = await response.text();
-                console.error('Response body:', responseText);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
             console.log('Connection test successful:', data);
-            showAlert('success', `Connected to API successfully! Found ${data.totalElements || 0} books.`);
+
+            updateConnectionStatus(true, 'Connected');
+            showAlert('success', `✅ API Connected! Found ${data.totalElements || 0} books.`);
             return data;
 
         } catch (error) {
             console.error('Connection test failed:', error);
+            updateConnectionStatus(false, 'Failed');
 
-            // Provide specific error messages
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                showAlert('error', `Connection failed: Cannot reach ${window.location.origin}${API_BASE_URL}. Make sure Spring Boot is running on port 8080.`);
+            let errorMessage = 'Connection failed';
+
+            if (error.name === 'AbortError') {
+                errorMessage = 'Connection timeout - Server not responding';
+            } else if (error.message.includes('fetch')) {
+                errorMessage = 'Cannot reach API server. Is Spring Boot running on port 8080?';
             } else if (error.message.includes('404')) {
-                showAlert('error', 'API endpoint not found (404). Check if your BookController is properly configured.');
-            } else if (error.message.includes('CORS')) {
-                showAlert('error', 'CORS error. Make sure your CorsConfig is properly set up.');
+                errorMessage = 'API endpoints not found. Check BookController configuration.';
             } else {
-                showAlert('error', `API connection failed: ${error.message}`);
+                errorMessage = error.message;
             }
 
+            showAlert('error', `❌ ${errorMessage}`);
             throw error;
         }
     }
@@ -910,92 +963,91 @@
         // Add active class to clicked nav tab
         event.target.classList.add('active');
 
-        // Load data based on tab
-        switch(tabName) {
-            case 'dashboard':
-                loadDashboard();
-                break;
-            case 'books':
-                loadBooks();
-                break;
-            case 'analytics':
-                loadLowStockBooks();
-                break;
+        // Load data based on tab if connected
+        if (isConnected) {
+            switch(tabName) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'books':
+                    loadBooks();
+                    break;
+                case 'analytics':
+                    loadLowStockBooks();
+                    break;
+            }
         }
     }
 
-    // API calls
+    // IMPROVED API calls with better error handling
     async function apiCall(endpoint, options = {}) {
+        if (!isConnected) {
+            throw new Error('API not connected. Please check your connection.');
+        }
+
         try {
             console.log(`Making API call to: ${API_BASE_URL}${endpoint}`);
-            console.log('Options:', options);
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
             const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 ...options,
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
+                    'Cache-Control': 'no-cache',
                     ...options.headers
-                }
+                },
+                signal: controller.signal
             });
 
+            clearTimeout(timeoutId);
+
             console.log(`Response status: ${response.status}`);
-            console.log(`Response headers:`, response.headers);
 
             if (!response.ok) {
                 let errorMessage = `HTTP error! status: ${response.status}`;
 
-                // Try to get error details
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    try {
+                try {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
                         const errorData = await response.json();
                         errorMessage = errorData.message || errorData.details || errorMessage;
 
-                        // Handle validation errors
                         if (errorData.validationErrors) {
                             const validationError = new Error(errorMessage);
                             validationError.validationErrors = errorData.validationErrors;
                             throw validationError;
                         }
-                    } catch (jsonError) {
-                        console.error('Failed to parse error response as JSON:', jsonError);
                     }
-                } else {
-                    // Server returned HTML or other content (likely error page)
-                    const textResponse = await response.text();
-                    console.error('Server returned non-JSON response:', textResponse.substring(0, 200));
-                    errorMessage = `Server error (${response.status}). Check console for details.`;
+                } catch (jsonError) {
+                    console.error('Failed to parse error response:', jsonError);
                 }
 
                 throw new Error(errorMessage);
             }
 
-            // Check if response is empty (for DELETE operations)
             if (response.status === 204) {
                 return null;
             }
 
-            // Try to parse JSON response
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 return await response.json();
             } else {
-                console.warn('Response is not JSON:', contentType);
                 return await response.text();
             }
 
         } catch (error) {
             console.error('API call failed:', error);
-            console.error('Full error details:', {
-                endpoint,
-                options,
-                error: error.message,
-                stack: error.stack
-            });
 
-            // Don't show alert for validation errors - they'll be handled separately
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout - operation took too long');
+            }
+
             if (!error.validationErrors) {
+                updateConnectionStatus(false, 'Connection Lost');
                 showAlert('error', `API Error: ${error.message}`);
             }
             throw error;
@@ -1008,24 +1060,23 @@
             const books = await apiCall('/books?page=0&size=1000');
             const allBooks = books.content;
 
-            // Calculate stats
             const totalBooks = allBooks.length;
             const lowStockBooks = allBooks.filter(book => book.stockQuantity < 10);
             const totalValue = allBooks.reduce((sum, book) => sum + (book.price * book.stockQuantity), 0);
             const uniqueAuthors = new Set(allBooks.map(book => book.author)).size;
 
-            // Update stats
             document.getElementById('total-books').textContent = totalBooks;
             document.getElementById('low-stock-count').textContent = lowStockBooks.length;
-            document.getElementById('total-value').textContent = `$${totalValue.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('total-value').textContent = `${totalValue.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
             document.getElementById('unique-authors').textContent = uniqueAuthors;
 
-            // Load recent books (last 5)
             const recentBooks = allBooks.slice(-5).reverse();
             renderRecentBooks(recentBooks);
 
         } catch (error) {
             console.error('Failed to load dashboard:', error);
+            document.getElementById('recent-books').innerHTML =
+                '<tr><td colspan="5" class="alert alert-error">Failed to load dashboard data</td></tr>';
         }
     }
 
@@ -1047,7 +1098,7 @@
         } catch (error) {
             console.error('Failed to load books:', error);
             document.getElementById('books-table').innerHTML =
-                '<tr><td colspan="7" class="alert alert-error">Failed to load books. Please try again.</td></tr>';
+                '<tr><td colspan="7" class="alert alert-error">Failed to load books. Please check your connection.</td></tr>';
         }
     }
 
@@ -1061,14 +1112,14 @@
         }
 
         tbody.innerHTML = books.map(book => `
-                <tr>
-                    <td>${escapeHtml(book.title)}</td>
-                    <td>${escapeHtml(book.author)}</td>
-                    <td>${book.price.toFixed(2)}</td>
-                    <td>${book.stockQuantity}</td>
-                    <td>${getStockBadge(book.stockQuantity)}</td>
-                </tr>
-            `).join('');
+            <tr>
+                <td>${escapeHtml(book.title)}</td>
+                <td>${escapeHtml(book.author)}</td>
+                <td>${book.price.toFixed(2)}</td>
+                <td>${book.stockQuantity}</td>
+                <td>${getStockBadge(book.stockQuantity)}</td>
+            </tr>
+        `).join('');
     }
 
     // Render books table
@@ -1081,23 +1132,23 @@
         }
 
         tbody.innerHTML = books.map(book => `
-                <tr>
-                    <td>${escapeHtml(book.title)}</td>
-                    <td>${escapeHtml(book.author)}</td>
-                    <td>${escapeHtml(book.isbn)}</td>
-                    <td>${book.publishedYear || '-'}</td>
-                    <td>${book.price.toFixed(2)}</td>
-                    <td>${book.stockQuantity}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
-                            ✏️
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.id})" title="Delete">
-                            🗑️
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td>${escapeHtml(book.title)}</td>
+                <td>${escapeHtml(book.author)}</td>
+                <td>${escapeHtml(book.isbn)}</td>
+                <td>${book.publishedYear || '-'}</td>
+                <td>${book.price.toFixed(2)}</td>
+                <td>${book.stockQuantity}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
+                        ✏️
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.id})" title="Delete">
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
     // Render search results
@@ -1110,20 +1161,20 @@
         }
 
         tbody.innerHTML = books.map(book => `
-                <tr>
-                    <td>${escapeHtml(book.title)}</td>
-                    <td>${escapeHtml(book.author)}</td>
-                    <td>${escapeHtml(book.isbn)}</td>
-                    <td>${book.publishedYear || '-'}</td>
-                    <td>${book.price.toFixed(2)}</td>
-                    <td>${book.stockQuantity}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
-                            ✏️
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td>${escapeHtml(book.title)}</td>
+                <td>${escapeHtml(book.author)}</td>
+                <td>${escapeHtml(book.isbn)}</td>
+                <td>${book.publishedYear || '-'}</td>
+                <td>${book.price.toFixed(2)}</td>
+                <td>${book.stockQuantity}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
+                        ✏️
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
     // Load low stock books
@@ -1136,7 +1187,7 @@
         } catch (error) {
             console.error('Failed to load low stock books:', error);
             document.getElementById('low-stock-table').innerHTML =
-                '<tr><td colspan="6" class="alert alert-error">Failed to load low stock books. Please try again.</td></tr>';
+                '<tr><td colspan="6" class="alert alert-error">Failed to load low stock books</td></tr>';
         }
     }
 
@@ -1150,19 +1201,19 @@
         }
 
         tbody.innerHTML = books.map(book => `
-                <tr>
-                    <td>${escapeHtml(book.title)}</td>
-                    <td>${escapeHtml(book.author)}</td>
-                    <td>${book.stockQuantity}</td>
-                    <td>${book.price.toFixed(2)}</td>
-                    <td>${getStockBadge(book.stockQuantity)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
-                            ✏️
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td>${escapeHtml(book.title)}</td>
+                <td>${escapeHtml(book.author)}</td>
+                <td>${book.stockQuantity}</td>
+                <td>${book.price.toFixed(2)}</td>
+                <td>${getStockBadge(book.stockQuantity)}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline" onclick="editBook(${book.id})" title="Edit">
+                        ✏️
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
     // Pagination functions
@@ -1178,12 +1229,10 @@
 
         let paginationHTML = '';
 
-        // Previous button
         if (currentPageNum > 0) {
             paginationHTML += `<button class="btn btn-outline btn-sm" onclick="changePage(${currentPageNum - 1})">‹ Previous</button>`;
         }
 
-        // Page numbers
         const startPage = Math.max(0, currentPageNum - 2);
         const endPage = Math.min(totalPages - 1, currentPageNum + 2);
 
@@ -1206,7 +1255,6 @@
             paginationHTML += `<button class="btn btn-outline btn-sm" onclick="changePage(${totalPages - 1})">${totalPages}</button>`;
         }
 
-        // Next button
         if (currentPageNum < totalPages - 1) {
             paginationHTML += `<button class="btn btn-outline btn-sm" onclick="changePage(${currentPageNum + 1})">Next ›</button>`;
         }
@@ -1230,12 +1278,10 @@
     function toggleSearchFields() {
         const searchType = document.getElementById('search-type').value;
 
-        // Hide all search fields
         document.querySelectorAll('[id$="-search"]').forEach(field => {
             field.classList.add('hidden');
         });
 
-        // Show relevant fields
         switch(searchType) {
             case 'keyword':
                 document.getElementById('keyword-search').classList.remove('hidden');
@@ -1257,6 +1303,11 @@
     }
 
     async function performSearch() {
+        if (!isConnected) {
+            showAlert('error', 'API not connected. Please check your connection.');
+            return;
+        }
+
         const searchType = document.getElementById('search-type').value;
         let endpoint = '';
         let params = new URLSearchParams();
@@ -1324,7 +1375,6 @@
             const url = params.toString() ? `${endpoint}?${params.toString()}` : endpoint;
             const data = await apiCall(url);
 
-            // Handle both paginated and non-paginated responses
             const books = data.content || data;
             renderSearchResults(books);
             document.getElementById('search-results').classList.remove('hidden');
@@ -1343,6 +1393,11 @@
 
     // Modal functions
     function showAddBookModal() {
+        if (!isConnected) {
+            showAlert('error', 'API not connected. Please check your connection.');
+            return;
+        }
+
         currentEditingId = null;
         document.getElementById('modal-title').textContent = 'Add New Book';
         document.getElementById('save-book-btn').innerHTML = '💾 Save Book';
@@ -1357,6 +1412,11 @@
     }
 
     async function editBook(id) {
+        if (!isConnected) {
+            showAlert('error', 'API not connected. Please check your connection.');
+            return;
+        }
+
         try {
             const book = await apiCall(`/books/${id}`);
             currentEditingId = id;
@@ -1364,7 +1424,6 @@
             document.getElementById('modal-title').textContent = 'Edit Book';
             document.getElementById('save-book-btn').innerHTML = '💾 Update Book';
 
-            // Populate form
             document.getElementById('book-title').value = book.title;
             document.getElementById('book-author').value = book.author;
             document.getElementById('book-isbn').value = book.isbn;
@@ -1385,7 +1444,11 @@
         event.preventDefault();
         clearErrors();
 
-        // Validate form data
+        if (!isConnected) {
+            showAlert('error', 'API not connected. Please check your connection.');
+            return;
+        }
+
         const title = document.getElementById('book-title').value.trim();
         const author = document.getElementById('book-author').value.trim();
         const isbn = document.getElementById('book-isbn').value.trim();
@@ -1407,32 +1470,24 @@
             description: document.getElementById('book-description').value.trim() || null
         };
 
-        console.log('Saving book data:', bookData);
-
         try {
             const endpoint = currentEditingId ? `/books/${currentEditingId}` : '/books';
             const method = currentEditingId ? 'PUT' : 'POST';
 
-            console.log(`Making ${method} request to ${endpoint}`);
-
-            const response = await apiCall(endpoint, {
+            await apiCall(endpoint, {
                 method,
                 body: JSON.stringify(bookData)
             });
-
-            console.log('Save response:', response);
 
             const action = currentEditingId ? 'updated' : 'created';
             showAlert('success', `Book ${action} successfully!`);
             hideBookModal();
 
-            // Refresh data
             await refreshData();
 
         } catch (error) {
             console.error('Failed to save book:', error);
 
-            // Handle validation errors
             if (error.validationErrors) {
                 handleValidationErrors(error);
             } else {
@@ -1442,6 +1497,11 @@
     }
 
     async function deleteBook(id) {
+        if (!isConnected) {
+            showAlert('error', 'API not connected. Please check your connection.');
+            return;
+        }
+
         if (!confirm('Are you sure you want to delete this book? This action cannot be undone.')) {
             return;
         }
@@ -1449,11 +1509,7 @@
         try {
             await apiCall(`/books/${id}`, { method: 'DELETE' });
             showAlert('success', 'Book deleted successfully!');
-
-            // Refresh data
-            loadDashboard();
-            loadBooks();
-            loadLowStockBooks();
+            await refreshData();
 
         } catch (error) {
             console.error('Failed to delete book:', error);
@@ -1473,17 +1529,10 @@
     }
 
     function handleValidationErrors(error) {
-        console.log('Handling validation errors:', error);
-
-        // Clear previous errors
         clearErrors();
 
-        // If the error has validation details, show them
         if (error.validationErrors && Array.isArray(error.validationErrors)) {
             error.validationErrors.forEach(validationError => {
-                console.log('Processing validation error:', validationError);
-
-                // Parse "field: message" format
                 const colonIndex = validationError.indexOf(':');
                 if (colonIndex > 0) {
                     const field = validationError.substring(0, colonIndex).trim();
@@ -1492,8 +1541,6 @@
                     const errorElement = document.getElementById(`${field}-error`);
                     if (errorElement) {
                         errorElement.textContent = message;
-                    } else {
-                        console.warn(`Error element not found for field: ${field}`);
                     }
                 }
             });
@@ -1531,15 +1578,14 @@
         const alertId = 'alert-' + Date.now();
 
         const alertHTML = `
-                <div id="${alertId}" class="alert alert-${type}" style="margin-bottom: 0.5rem;">
-                    ${getAlertIcon(type)} ${message}
-                    <button onclick="dismissAlert('${alertId}')" style="background: none; border: none; float: right; cursor: pointer; font-weight: bold;">&times;</button>
-                </div>
-            `;
+            <div id="${alertId}" class="alert alert-${type}" style="margin-bottom: 0.5rem;">
+                ${getAlertIcon(type)} ${message}
+                <button onclick="dismissAlert('${alertId}')" style="background: none; border: none; float: right; cursor: pointer; font-weight: bold;">&times;</button>
+            </div>
+        `;
 
         alertsContainer.insertAdjacentHTML('beforeend', alertHTML);
 
-        // Auto-dismiss after 5 seconds
         setTimeout(() => {
             dismissAlert(alertId);
         }, 5000);
@@ -1564,17 +1610,20 @@
 
     // Refresh data
     async function refreshData() {
+        if (!isConnected) {
+            await testConnection();
+            if (!isConnected) return;
+        }
+
         try {
             showAlert('info', 'Refreshing data...');
 
-            // Run all refreshes in parallel
             await Promise.all([
                 loadDashboard(),
                 loadBooks(),
                 loadLowStockBooks()
             ]);
 
-            console.log('Data refresh completed');
         } catch (error) {
             console.error('Failed to refresh data:', error);
             showAlert('error', 'Failed to refresh some data. Please try again.');
@@ -1583,7 +1632,6 @@
 
     // Keyboard shortcuts
     document.addEventListener('keydown', function(event) {
-        // Escape key to close modal
         if (event.key === 'Escape') {
             const modal = document.getElementById('book-modal');
             if (!modal.classList.contains('hidden')) {
@@ -1591,20 +1639,17 @@
             }
         }
 
-        // Ctrl/Cmd + N to add new book
         if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
             event.preventDefault();
             showAddBookModal();
         }
 
-        // Ctrl/Cmd + R to refresh
         if ((event.ctrlKey || event.metaKey) && event.key === 'r') {
             event.preventDefault();
             refreshData();
         }
     });
 
-    // Handle form submission in search
     document.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
             const activeTab = document.querySelector('.tab-content:not(.hidden)');
