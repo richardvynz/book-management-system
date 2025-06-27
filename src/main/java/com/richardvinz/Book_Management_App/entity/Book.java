@@ -2,10 +2,19 @@ package com.richardvinz.Book_Management_App.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "books")
+@Data  // ✅ ADD THIS - generates getters, setters, equals, hashCode, toString
+@Builder(toBuilder = true)  // ✅ KEEP toBuilder = true
+@NoArgsConstructor  // ✅ ADD THIS - generates no-args constructor
+@AllArgsConstructor  // ✅ ADD THIS - generates all-args constructor
 public class Book {
 
     @Id
@@ -63,8 +72,6 @@ public class Book {
         updatedAt = LocalDateTime.now();
     }
 
-    // Constructors
-    public Book() {}
 
     public Book(String title, String author, String isbn, Integer publishedYear,
                 String description, Double price, Integer stockQuantity) {
@@ -76,35 +83,4 @@ public class Book {
         this.price = price;
         this.stockQuantity = stockQuantity;
     }
-
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public String getAuthor() { return author; }
-    public void setAuthor(String author) { this.author = author; }
-
-    public String getIsbn() { return isbn; }
-    public void setIsbn(String isbn) { this.isbn = isbn; }
-
-    public Integer getPublishedYear() { return publishedYear; }
-    public void setPublishedYear(Integer publishedYear) { this.publishedYear = publishedYear; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
-
-    public Integer getStockQuantity() { return stockQuantity; }
-    public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
